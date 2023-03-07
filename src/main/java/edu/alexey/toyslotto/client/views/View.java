@@ -6,7 +6,6 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Function;
 
-import edu.alexey.toyslotto.client.uielements.Menu;
 import edu.alexey.toyslotto.client.viewmodels.ViewModelBase;
 
 public interface View {

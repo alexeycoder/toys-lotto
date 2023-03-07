@@ -26,67 +26,14 @@ import java.util.stream.Stream;
 import edu.alexey.toyslotto.domain.db.FileUtils;
 
 public class Test {
-	public static record Pair(Integer a, Integer b) {
-	}
 
 	public static void main(String[] args) throws IOException {
+		
 		Charset charset = Charset.forName("UTF-8");
-		Path path = Path.of(".data/testfile3.csv");
-		File file = path.toFile();
-
-		System.out.println("Hello World!");
+		java.nio.file.Path path = java.nio.file.Path.of(".data/testfile3.csv");
+		java.io.File file = path.toFile();
 
 		System.out.println("=".repeat(80));
-
-		var content = Files.lines(path, charset);
-		content.forEach(System.out::println);
-
-		System.out.println("=".repeat(80) + "READ_RAF");
-
-		try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
-			boolean endReached = false;
-			do {
-				var readResult = FileUtils.readLine(raf, charset);
-				endReached = readResult.endReached();
-				System.out.print(readResult.line());
-			} while (!endReached);
-			System.out.println();
-		}
-
-		System.out.println("=".repeat(80));
-
-		try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
-			if (raf.length() > 0) {
-				raf.seek(Math.max(raf.length() - 1, 0));
-				System.out.println("Pos before read last byte = " + raf.getFilePointer());
-				System.out.println("File Length = " + raf.length());
-				byte readByte = raf.readByte();
-				System.out.println(String.format("Last Byte = %s", (char) readByte));
-				System.out.println("Pos after read last byte = " + raf.getFilePointer());
-			}
-		}
-
-		System.out.println("=".repeat(80) + "READ_RAF_BACKWARD");
-
-		try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
-			raf.seek(Math.max(raf.length() - 1, 0));
-			boolean endReached = false;
-			do {
-				var readResult = FileUtils.readLineBackward(raf, charset);
-				endReached = readResult.endReached();
-				System.out.print(readResult.line());
-			} while (!endReached);
-			System.out.println();
-		}
-
-		System.out.println("=".repeat(80));
-
-		var lst = List.of(1, 2, 3, 4, 5, 6, 7, 8);
-		var res = lst.stream().reduce((first, second) -> (second < first ? second : -1));// .filter(i -> i
-		// <0);//.orElse(null);
-		// var res =
-		// lst.stream().mapMulti(null
-		System.out.println(res);
 
 		Stream.of("hello", "world")
 				.<Character>mapMulti((str, sink) -> {
@@ -96,15 +43,18 @@ public class Test {
 				}).forEach(System.out::println);
 
 		System.out.println("=".repeat(80));
-		
+
 		checkConsistency(file, charset);
-		
+
 		System.out.println("=".repeat(80));
 
-		testMap();
+		// testMap();
 	}
 
 	public static record Dummy(int id, String str) {
+	}
+
+	public static record SeqPair(int prev, int next) {
 	}
 
 	private static boolean checkConsistency(File file, Charset charset) throws IOException {
@@ -115,21 +65,26 @@ public class Test {
 
 		final Function<Dummy, Integer> getId = d -> d.id;
 
-		var linesStream = Files.lines(file.toPath(), charset);
-		var idsSequence = linesStream.filter(s -> !s.startsWith("#"))
-				.map(toObj).filter(Optional::isPresent).map(Optional<Dummy>::get)
-				.map(getId);
+		try (var linesStream = Files.lines(file.toPath(), charset)) {
+			var idsSequence = linesStream.filter(s -> !s.startsWith("#"))
+					.map(toObj).filter(Optional::isPresent).map(Optional<Dummy>::get)
+					.map(getId);
 
-		final Integer[] tmp = new Integer[] { 0 };
-		idsSequence.forEach(i -> {
-			// System.out.print(Test.prev + " ");
-			System.out.print(tmp[0] + " ");
-			// Test.prev = i;
-			tmp[0] = i;
-			// System.out.print(Test.prev + " ;");
-			System.out.print(tmp[0] + " ;");
-		});
+			final int[] tmp = new int[] { 0 };
+			// idsSequence.forEachOrdered(i -> {
+			// System.out.print(tmp[0] + " ");
+			// tmp[0] = i;
+			// System.out.print(tmp[0] + " ;");
+			// });
 
+			var pairs = idsSequence.map(i -> {
+				var pair = new SeqPair(tmp[0], i);
+				tmp[0] = i;
+				return pair;
+			}).peek(System.out::println).anyMatch(p -> p.next <= p.prev);
+
+			System.out.println(pairs);
+		}
 		return false;
 	}
 

@@ -38,7 +38,6 @@ public class FileUtils {
 					+ " either the end of file"
 					+ " or line separator before reading lines backward!");
 		}
-
 		// if (endPos == 0L) {
 		// return "\n";
 		// }
@@ -65,4 +64,40 @@ public class FileUtils {
 		String line = new String(bytes, charset);
 		return new ReadResult(line, endReached);
 	}
+
+	// public static void main(String[] args) throws IOException {
+
+	// 	Charset charset = Charset.forName("UTF-8");
+	// 	java.nio.file.Path path = java.nio.file.Path.of(".data/testfile3.csv");
+	// 	java.io.File file = path.toFile();
+
+	// 	System.out.println("=TEST" + "=".repeat(80));
+	// 	System.out.println("=INITIAL=CONTENT" + "=".repeat(80));
+	// 	java.nio.file.Files.lines(path, charset).forEach(System.out::println);
+
+	// 	System.out.println("=READ=RAF" + "=".repeat(80));
+
+	// 	try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
+	// 		boolean endReached = false;
+	// 		do {
+	// 			var readResult = FileUtils.readLine(raf, charset);
+	// 			endReached = readResult.endReached();
+	// 			System.out.print(readResult.line());
+	// 		} while (!endReached);
+	// 		System.out.println();
+	// 	}
+
+	// 	System.out.println("=READ=RAF=BACKWARD" + "=".repeat(80));
+
+	// 	try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
+	// 		raf.seek(Math.max(raf.length() - 1, 0));
+	// 		boolean endReached = false;
+	// 		do {
+	// 			var readResult = FileUtils.readLineBackward(raf, charset);
+	// 			endReached = readResult.endReached();
+	// 			System.out.print(readResult.line());
+	// 		} while (!endReached);
+	// 		System.out.println();
+	// 	}
+	// }
 }

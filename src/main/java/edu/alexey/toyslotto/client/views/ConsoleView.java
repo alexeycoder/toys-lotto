@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.function.Function;
 
 import edu.alexey.toyslotto.AppSettings;
-import edu.alexey.toyslotto.client.uielements.Menu;
 import edu.alexey.toyslotto.client.viewmodels.ViewModelBase;
 
 public class ConsoleView implements View {
@@ -19,7 +18,6 @@ public class ConsoleView implements View {
 	private static final String PROMPT_ENTER = "Нажмите Ввод чтобы продолжить...";
 	private static final String WARN_WRONG_MENU_ITEM = "Некорректный ввод: требуется выбрать пункт меню. "
 			+ PLEASE_REPEAT;
-	private static final String EXIT_APP_NOTE = "Вы завершили программу.";
 
 	@Override
 	public void clear() {

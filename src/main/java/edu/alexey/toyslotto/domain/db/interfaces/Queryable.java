@@ -1,4 +1,4 @@
-package edu.alexey.toyslotto.domain.db;
+package edu.alexey.toyslotto.domain.db.interfaces;
 
 import java.util.stream.Stream;
 
