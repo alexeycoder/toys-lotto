@@ -22,7 +22,6 @@ public class CsvQueryableBase<T> implements Queryable<T> {
 	private final Function<String, Optional<T>> toObj;
 	private final Function<T, Integer> getId;
 	private final ObjIntConsumer<T> setId;
-	private final Path path;
 	private final File file;
 
 	private int nextId;
@@ -34,8 +33,7 @@ public class CsvQueryableBase<T> implements Queryable<T> {
 			Function<T, Integer> getId,
 			ObjIntConsumer<T> setId) throws IOException {
 
-		this.path = prepareFile(pathToCsv);
-		this.file = this.path.toFile();
+		this.file = prepareFile(pathToCsv);
 		this.toCsv = toCsv;
 		this.toObj = toObj;
 		this.getId = getId;
@@ -48,13 +46,10 @@ public class CsvQueryableBase<T> implements Queryable<T> {
 
 	// }
 
-	
-
 	private int getNextId() {
+
 		return 0;
 	}
-
-
 
 	@Override
 	public T add(T entry) {
@@ -86,12 +81,16 @@ public class CsvQueryableBase<T> implements Queryable<T> {
 		return false;
 	}
 
+	private boolean checkConsistency() throws IOException {
+		var linesStream = Files.lines(file.toPath(), CHARSET);
+		var idsSequence = linesStream.filter(s -> !s.startsWith(COMMENT_LINE))
+				.map(this.toObj).filter(Optional::isPresent).map(Optional<T>::get)
+				.map(this.getId);
+		return false;
+	}
 
-
-
-	private static Path prepareFile(String pathToCsv) throws IOException {
+	private static File prepareFile(String pathToCsv) throws IOException {
 		Path path = Path.of(pathToCsv);
-
 		if (Files.notExists(path)) {
 			Files.createFile(path);
 		}
@@ -108,9 +107,7 @@ public class CsvQueryableBase<T> implements Queryable<T> {
 			throw new IOException("File write access denied");
 		}
 
-		return path;
+		return path.toFile();
 	}
-
-	
 
 }

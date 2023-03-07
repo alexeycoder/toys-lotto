@@ -11,18 +11,27 @@ import java.nio.charset.Charset;
 import java.nio.charset.spi.CharsetProvider;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.KeyStore.Entry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import edu.alexey.toyslotto.domain.db.FileUtils;
 
 public class Test {
+	public static record Pair(Integer a, Integer b) {
+	}
+
 	public static void main(String[] args) throws IOException {
 		Charset charset = Charset.forName("UTF-8");
-		Path path = Path.of(".data/testfile.csv");
+		Path path = Path.of(".data/testfile3.csv");
 		File file = path.toFile();
 
 		System.out.println("Hello World!");
@@ -47,19 +56,20 @@ public class Test {
 		System.out.println("=".repeat(80));
 
 		try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
-			raf.seek(raf.length() - 1);
-			System.out.println("Pos before read last byte = " + raf.getFilePointer());
-			System.out.println("File Length = " + raf.length());
-
-			byte readByte = raf.readByte();
-			System.out.println(String.format("Last Byte = %s", (char) readByte));
-			System.out.println("Pos after read last byte = " + raf.getFilePointer());
+			if (raf.length() > 0) {
+				raf.seek(Math.max(raf.length() - 1, 0));
+				System.out.println("Pos before read last byte = " + raf.getFilePointer());
+				System.out.println("File Length = " + raf.length());
+				byte readByte = raf.readByte();
+				System.out.println(String.format("Last Byte = %s", (char) readByte));
+				System.out.println("Pos after read last byte = " + raf.getFilePointer());
+			}
 		}
 
 		System.out.println("=".repeat(80) + "READ_RAF_BACKWARD");
 
 		try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
-			raf.seek(raf.length() - 1);
+			raf.seek(Math.max(raf.length() - 1, 0));
 			boolean endReached = false;
 			do {
 				var readResult = FileUtils.readLineBackward(raf, charset);
@@ -68,6 +78,82 @@ public class Test {
 			} while (!endReached);
 			System.out.println();
 		}
+
+		System.out.println("=".repeat(80));
+
+		var lst = List.of(1, 2, 3, 4, 5, 6, 7, 8);
+		var res = lst.stream().reduce((first, second) -> (second < first ? second : -1));// .filter(i -> i
+		// <0);//.orElse(null);
+		// var res =
+		// lst.stream().mapMulti(null
+		System.out.println(res);
+
+		Stream.of("hello", "world")
+				.<Character>mapMulti((str, sink) -> {
+					for (char c : str.toCharArray()) {
+						sink.accept(c);
+					}
+				}).forEach(System.out::println);
+
+		System.out.println("=".repeat(80));
+		
+		checkConsistency(file, charset);
+		
+		System.out.println("=".repeat(80));
+
+		testMap();
+	}
+
+	public static record Dummy(int id, String str) {
+	}
+
+	private static boolean checkConsistency(File file, Charset charset) throws IOException {
+		final Function<String, Optional<Dummy>> toObj = s -> {
+			var arr = s.strip().split(";");
+			return arr.length == 2 ? Optional.of(new Dummy(Integer.parseInt(arr[0]), arr[1])) : Optional.empty();
+		};
+
+		final Function<Dummy, Integer> getId = d -> d.id;
+
+		var linesStream = Files.lines(file.toPath(), charset);
+		var idsSequence = linesStream.filter(s -> !s.startsWith("#"))
+				.map(toObj).filter(Optional::isPresent).map(Optional<Dummy>::get)
+				.map(getId);
+
+		final Integer[] tmp = new Integer[] { 0 };
+		idsSequence.forEach(i -> {
+			// System.out.print(Test.prev + " ");
+			System.out.print(tmp[0] + " ");
+			// Test.prev = i;
+			tmp[0] = i;
+			// System.out.print(Test.prev + " ;");
+			System.out.print(tmp[0] + " ;");
+		});
+
+		return false;
+	}
+
+	private static void testMap() {
+		var myMap = Map.of(
+				1, "Stroka1",
+				2, "Stroka2",
+				5, "Stroka5",
+				4, "Stroka4",
+				3, "Stroka",
+				7, "Stroka7",
+				8, "Stroka8",
+				9, "Stroka9");
+
+		for (var kv : myMap.entrySet()) {
+			System.out.println(kv.getKey() + " -- " + kv.getValue());
+		}
+
+		var map2 = new LinkedHashMap<>(myMap);
+
+		for (var kv : map2.entrySet()) {
+			System.out.println(kv.getKey() + " -- " + kv.getValue());
+		}
+
 	}
 
 	// public static String readUtf8Line(RandomAccessFile raf, Charset charset)

@@ -28,6 +28,10 @@ public class FileUtils {
 	}
 
 	public static ReadResult readLineBackward(RandomAccessFile raf, Charset charset) throws IOException {
+		if (raf.length() == 0) {
+			return new ReadResult("", true);
+		}
+
 		long endPos = raf.getFilePointer();
 		if (!(endPos == raf.length() - 1 || raf.readByte() == LINE_SEP)) {
 			throw new IllegalStateException("File pointer must point at"
