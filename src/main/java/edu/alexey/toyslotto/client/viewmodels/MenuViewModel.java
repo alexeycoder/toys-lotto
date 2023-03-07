@@ -25,7 +25,7 @@ public class MenuViewModel extends ViewModelBase {
 
 	private final String strRepr;
 
-	public MenuViewModel(Menu menu) {
+	protected MenuViewModel(Menu menu) {
 		var menuMap = menu.items();
 		var menuKeysSet = menuMap.keySet();
 		int keysMaxLen = menuKeysSet.stream().map(MenuViewModel::keyToStr).mapToInt(String::length).max().getAsInt();
@@ -54,6 +54,7 @@ public class MenuViewModel extends ViewModelBase {
 							+ PADDING + FRAME_V);
 				});
 		lines.add(FRAME_BTM_L + FRAME_H.repeat(hFrameWidth) + FRAME_BTM_R);
+		lines.add("");
 
 		strRepr = String.join(System.lineSeparator(), lines);
 	}
