@@ -124,12 +124,12 @@ public class Controller {
 
 	// handlers
 
-	private ReturnStatus dummyHandler(Object nothing) {
-		view.show("Скоро, но не сейчас...\n"
-				+ "Данная функция будет доступна в следующей версии.");
-		view.waitToProceed();
-		return new ReturnStatus(false);
-	}
+	// private ReturnStatus dummyHandler(Object nothing) {
+	// 	view.show("Скоро, но не сейчас...\n"
+	// 			+ "Данная функция будет доступна в следующей версии.");
+	// 	view.waitToProceed();
+	// 	return new ReturnStatus(false);
+	// }
 
 	private ReturnStatus showPrizePool(Object nothing) {
 		var prizePoolRepository = data.prizePoolRepository();

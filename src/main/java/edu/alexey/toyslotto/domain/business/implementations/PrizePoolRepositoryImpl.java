@@ -2,7 +2,6 @@ package edu.alexey.toyslotto.domain.business.implementations;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
