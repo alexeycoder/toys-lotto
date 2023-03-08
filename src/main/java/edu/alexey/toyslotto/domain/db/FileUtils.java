@@ -8,7 +8,7 @@ import java.nio.charset.Charset;
 public class FileUtils {
 	public static final byte LINE_SEP = 0xA;
 
-	public static record ReadResult(String line, boolean endReached) {
+	public static record ReadResult(String line, boolean endReached, int length) {
 	}
 
 	public static ReadResult readLine(RandomAccessFile raf, Charset charset) throws IOException {
@@ -22,14 +22,14 @@ public class FileUtils {
 		}
 
 		boolean endReached = raf.getFilePointer() == raf.length();
-		String line = new String(readBytes.toByteArray(), charset);
-		return new ReadResult(line, endReached);
-
+		var bytesArr = readBytes.toByteArray();
+		String line = new String(bytesArr, charset);
+		return new ReadResult(line, endReached, bytesArr.length);
 	}
 
 	public static ReadResult readLineBackward(RandomAccessFile raf, Charset charset) throws IOException {
 		if (raf.length() == 0) {
-			return new ReadResult("", true);
+			return new ReadResult("", true, 0);
 		}
 
 		long endPos = raf.getFilePointer();
@@ -62,42 +62,42 @@ public class FileUtils {
 		raf.readFully(bytes);
 		raf.seek(pos);
 		String line = new String(bytes, charset);
-		return new ReadResult(line, endReached);
+		return new ReadResult(line, endReached, len);
 	}
 
 	// public static void main(String[] args) throws IOException {
 
-	// 	Charset charset = Charset.forName("UTF-8");
-	// 	java.nio.file.Path path = java.nio.file.Path.of(".data/testfile3.csv");
-	// 	java.io.File file = path.toFile();
+	// Charset charset = Charset.forName("UTF-8");
+	// java.nio.file.Path path = java.nio.file.Path.of(".data/testfile3.csv");
+	// java.io.File file = path.toFile();
 
-	// 	System.out.println("=TEST" + "=".repeat(80));
-	// 	System.out.println("=INITIAL=CONTENT" + "=".repeat(80));
-	// 	java.nio.file.Files.lines(path, charset).forEach(System.out::println);
+	// System.out.println("=TEST" + "=".repeat(80));
+	// System.out.println("=INITIAL=CONTENT" + "=".repeat(80));
+	// java.nio.file.Files.lines(path, charset).forEach(System.out::println);
 
-	// 	System.out.println("=READ=RAF" + "=".repeat(80));
+	// System.out.println("=READ=RAF" + "=".repeat(80));
 
-	// 	try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
-	// 		boolean endReached = false;
-	// 		do {
-	// 			var readResult = FileUtils.readLine(raf, charset);
-	// 			endReached = readResult.endReached();
-	// 			System.out.print(readResult.line());
-	// 		} while (!endReached);
-	// 		System.out.println();
-	// 	}
+	// try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
+	// boolean endReached = false;
+	// do {
+	// var readResult = FileUtils.readLine(raf, charset);
+	// endReached = readResult.endReached();
+	// System.out.print(readResult.line());
+	// } while (!endReached);
+	// System.out.println();
+	// }
 
-	// 	System.out.println("=READ=RAF=BACKWARD" + "=".repeat(80));
+	// System.out.println("=READ=RAF=BACKWARD" + "=".repeat(80));
 
-	// 	try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
-	// 		raf.seek(Math.max(raf.length() - 1, 0));
-	// 		boolean endReached = false;
-	// 		do {
-	// 			var readResult = FileUtils.readLineBackward(raf, charset);
-	// 			endReached = readResult.endReached();
-	// 			System.out.print(readResult.line());
-	// 		} while (!endReached);
-	// 		System.out.println();
-	// 	}
+	// try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
+	// raf.seek(Math.max(raf.length() - 1, 0));
+	// boolean endReached = false;
+	// do {
+	// var readResult = FileUtils.readLineBackward(raf, charset);
+	// endReached = readResult.endReached();
+	// System.out.print(readResult.line());
+	// } while (!endReached);
+	// System.out.println();
+	// }
 	// }
 }
