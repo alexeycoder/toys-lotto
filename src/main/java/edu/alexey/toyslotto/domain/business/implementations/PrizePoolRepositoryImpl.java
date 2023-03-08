@@ -27,7 +27,7 @@ public class PrizePoolRepositoryImpl implements PrizePoolRepository {
 	}
 
 	@Override
-	public ToyItem getToyItemByName(String toyName) {
+	public List<ToyItem> getToyItemsByName(String toyName) {
 		if (toyName == null) {
 			throw new NullPointerException("toyName");
 		}
@@ -35,11 +35,8 @@ public class PrizePoolRepositoryImpl implements PrizePoolRepository {
 			throw new InvalidParameterException("toyName");
 		}
 		final String name = toyName.toLowerCase();
-		var dbEntity = prizePool.queryAll().filter(t -> t.getName().toLowerCase().contains(name)).findAny();
-		if (dbEntity.isPresent()) {
-			return dbEntity.get(); // no need to clone
-		}
-		return null;
+		var dbEntities = prizePool.queryAll().filter(t -> t.getName().toLowerCase().contains(name)).toList();
+		return dbEntities; // no need to clone
 	}
 
 	@Override

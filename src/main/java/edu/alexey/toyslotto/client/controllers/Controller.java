@@ -1,13 +1,15 @@
 package edu.alexey.toyslotto.client.controllers;
 
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.Set;
 
+import edu.alexey.toyslotto.client.uielements.Menu;
 import edu.alexey.toyslotto.client.uielements.MenuItem;
 import edu.alexey.toyslotto.client.viewmodels.ViewModelBase;
-import edu.alexey.toyslotto.client.views.ConsoleView;
 import edu.alexey.toyslotto.client.views.View;
-import edu.alexey.toyslotto.client.uielements.Menu;
+import edu.alexey.toyslotto.domain.business.interfaces.DataManager;
+import edu.alexey.toyslotto.domain.entities.ToyItem;
 
 public class Controller {
 	// inner types
@@ -15,8 +17,8 @@ public class Controller {
 	}
 
 	// fabric
-	public static void createAndRun() {
-		var controller = new Controller(new ConsoleView());
+	public static void createAndRun(DataManager dataManager, View view) {
+		var controller = new Controller(dataManager, view);
 		controller.runLifecycle();
 	}
 
@@ -39,27 +41,31 @@ public class Controller {
 	public final Menu PRIZE_POOL_MENU = new Menu(
 			"Призовой фонд",
 			Map.of(
-					Set.of("1"), new MenuItem(1, "Вывести список игрушек", this::dummyHandler),
-					Set.of("2"), new MenuItem(2, "Найти по наименованию", null),
-					Set.of("3"), new MenuItem(3, "Найти по идентификатору", null),
-					Set.of("4"), new MenuItem(4, "Добавить", null),
-					Set.of("5"), new MenuItem(5, "Редактировать", null),
-					Set.of("6"), new MenuItem(6, "Удалить", null),
+					Set.of("1"), new MenuItem(1, "Вывести список игрушек", this::showPrizePool),
+					Set.of("2"), new MenuItem(2, "Найти по наименованию", this::findToyItemsByName),
+					Set.of("3"), new MenuItem(3, "Найти по идентификатору", this::findToyItemById),
+					Set.of("4"), new MenuItem(4, "Добавить", this::addToyItem),
+					Set.of("5"), new MenuItem(5, "Редактировать", this::editToyItem),
+					Set.of("6"), new MenuItem(6, "Удалить", this::deleteToyItem),
 					Set.of(" "), new MenuItem(90, null, null),
 					CMD_GO_BACK, new MenuItem(91, "Вернуться в предыдущее меню", null),
 					CMD_EXIT, new MenuItem(99, "Завершить работу", null)));
 
 	// fields
 	private final View view;
+	private final DataManager data;
 
 	// ctor
-	protected Controller(View viewManager) {
-		this.view = viewManager;
+	protected Controller(DataManager dataManager, View view) {
+		this.data = dataManager;
+		this.view = view;
 	}
 
 	private void runLifecycle() {
 		menuLifecycle(MAIN_MENU);
 	}
+
+	// base lifecycle runners
 
 	private ReturnStatus menuLifecycle(Menu menu, boolean onetime, boolean clear) {
 
@@ -98,6 +104,18 @@ public class Controller {
 		}
 	}
 
+	private ReturnStatus menuLifecycle(Menu menu) {
+		return menuLifecycle(menu, false, true);
+	}
+
+	// particular lifecycle runners
+
+	private ReturnStatus prizePoolLifecycle(Object nothing) {
+		return menuLifecycle(PRIZE_POOL_MENU);
+	}
+
+	// handlers
+
 	private ReturnStatus dummyHandler(Object nothing) {
 		view.show("Скоро, но не сейчас...\n"
 				+ "Данная функция будет доступна в следующей версии.");
@@ -105,17 +123,266 @@ public class Controller {
 		return new ReturnStatus(false);
 	}
 
-	private ReturnStatus prizePoolLifecycle(Object nothing) {
-		return menuLifecycle(PRIZE_POOL_MENU);
+	private ReturnStatus showPrizePool(Object nothing) {
+		var prizePoolRepository = data.prizePoolRepository();
+		var toyItems = prizePoolRepository.getAllToyItems();
+
+		view.clear();
+		view.show("Призовой фонд \u2014 Список игрушек\n");
+		view.show(ViewModelBase.emptySpace(1));
+		view.show(ViewModelBase.of(toyItems));
+		view.show(SHORT_HR);
+		view.waitToProceed();
+		return new ReturnStatus(false);
 	}
 
-	private ReturnStatus menuLifecycle(Menu menu) {
-		return menuLifecycle(menu, false, true);
+	private ReturnStatus findToyItemById(Object nothing) {
+		var rs = new ReturnStatus(false);
+
+		view.clear();
+		view.show("Призовой фонд \u2014 Поиск позиции по ID\n");
+
+		do {
+			view.show(ViewModelBase.emptySpace(1));
+			ToyItem toyItem = askToyItemById("Введите ID позиции (или пустой Ввод чтобы отменить): ");
+			if (toyItem == null) {
+				break;
+			}
+
+			view.show("Найдена запись:\n");
+			view.show(ViewModelBase.of(toyItem));
+			view.show(SHORT_HR);
+
+		} while (view.askYesNo("Повторить поиск (Д/н) (Y/n)? ", true));
+
+		view.waitToProceed();
+		return rs;
 	}
 
-	// TODO: Remove after tests
-	public static void main(String[] args) {
-		Controller.createAndRun();
+	private ToyItem askToyItemById(String prompt) {
+		ToyItem toyItem = null;
+		int id;
+		do {
+			OptionalInt answer = view.askInteger(prompt, 1, null);
+			if (answer.isEmpty()) {
+				return null;
+			}
+			id = answer.getAsInt();
+			var prizePoolRepository = data.prizePoolRepository();
+			toyItem = prizePoolRepository.getToyItemById(id);
+		} while (toyItem == null
+				&& view.askYesNo(String.format("Записи с ID %d не найдено.\nПовторить поиск (Д/н) (Y/n)? ", id), true));
+
+		return toyItem;
 	}
 
+	private ReturnStatus findToyItemsByName(Object nothing) {
+		var rs = new ReturnStatus(false);
+
+		view.clear();
+		view.show("Призовой фонд \u2014 Поиск позиций по наименованию\n");
+		do {
+			view.show(ViewModelBase.emptySpace(1));
+			var answer = view.askString(
+					"Введите наименование игрушки, частично или полностью"
+							+ " (пустой Ввод для отмены):\n",
+					null, null);
+			if (answer.isEmpty()) {
+				break;
+			}
+
+			String nameSample = answer.get();
+			var prizePoolRepository = data.prizePoolRepository();
+			var toyItems = prizePoolRepository.getToyItemsByName(nameSample);
+
+			view.show(ViewModelBase.emptySpace(1));
+
+			if (toyItems.isEmpty()) {
+				view.show(String.format("Записей по образцу '%s' не найдено.\n", nameSample));
+			} else {
+				view.show(String.format("Найдено записей: %d\n", toyItems.size()));
+				view.show(ViewModelBase.emptySpace(1));
+				view.show(ViewModelBase.of(toyItems));
+			}
+
+			view.show(SHORT_HR);
+
+		} while (view.askYesNo("Повторить поиск (Д/н) (Y/n)? ", true));
+
+		view.waitToProceed();
+		return rs;
+	}
+
+	private ReturnStatus addToyItem(Object nothing) {
+		var rs = new ReturnStatus(false);
+
+		view.clear();
+		view.show("Призовой фонд \u2014 Добавление позиции\n");
+
+		do {
+			view.show(ViewModelBase.emptySpace(1));
+			var nameOpt = view.askString(
+					"Введите наименование игрушки (пустой Ввод для отмены):\n",
+					null, null);
+			if (nameOpt.isEmpty()) {
+				view.show("Добавление отменено.\n");
+				break;
+			}
+
+			var weightOpt = view.askInteger(
+					"Введите вес \u2014 условную частоту выпадения 0..100 (пустой Ввод для отмены):\n",
+					ToyItem.MIN_WEIGHT, ToyItem.MAX_WEIGHT);
+			if (weightOpt.isEmpty()) {
+				view.show("Добавление отменено.\n");
+				break;
+			}
+
+			var qtyOpt = view.askInteger("Введите количество в наличии (пустой Ввод для отмены):\n",
+					0, null);
+			if (qtyOpt.isEmpty()) {
+				view.show("Добавление отменено.\n");
+				break;
+			}
+
+			ToyItem toyItemToAdd = new ToyItem(null, nameOpt.get(), weightOpt.getAsInt(), qtyOpt.getAsInt());
+			var prizePoolRepository = data.prizePoolRepository();
+			ToyItem addedToyItem = prizePoolRepository.addToyItem(toyItemToAdd);
+
+			view.show(ViewModelBase.emptySpace(1));
+			if (addedToyItem == null) {
+				view.show("Что-то пошло не так. Не удалось добавить позицию.");
+			} else {
+				view.show("Успешно добавлена позиция:\n");
+				view.show(ViewModelBase.emptySpace(1));
+				view.show(ViewModelBase.of(addedToyItem));
+			}
+
+			view.show(SHORT_HR);
+
+		} while (view.askYesNo("Добавить ещё позицию (Д/н) (Y/n)? ", true));
+
+		view.waitToProceed();
+		return rs;
+	}
+
+	private ReturnStatus editToyItem(Object nothing) {
+		var rs = new ReturnStatus(false);
+
+		view.clear();
+		view.show("Призовой фонд \u2014 Редактирование позиции\n");
+
+		do {
+			view.show(ViewModelBase.emptySpace(1));
+
+			ToyItem toyItem = askToyItemById(
+					"Введите ID позиции, которую необходимо редактировать (или пустой Ввод чтобы отменить): ");
+			if (toyItem == null) {
+				view.show("Редактирование отменено.\n");
+				break;
+			}
+
+			view.show("Найдена запись:\n");
+			view.show(ViewModelBase.of(toyItem));
+
+			boolean anyChanges = false;
+
+			var nameOpt = view.askString(
+					"Введите новое наименование (или пустой Ввод чтобы оставить прежнее):\n",
+					null, null);
+			if (nameOpt.isPresent()) {
+				toyItem.setName(nameOpt.get());
+				anyChanges = true;
+			}
+
+			var weightOpt = view.askInteger(
+					"Введите новую условную частоту выпадения 0..100 (или пустой Ввод чтобы не менять):\n",
+					ToyItem.MIN_WEIGHT, ToyItem.MAX_WEIGHT);
+			if (weightOpt.isPresent()) {
+				toyItem.setWeight(weightOpt.getAsInt());
+				anyChanges = true;
+			}
+
+			var qtyOpt = view.askInteger("Введите количество в наличии (или пустой Ввод чтобы не менять):\n",
+					0, null);
+			if (qtyOpt.isPresent()) {
+				toyItem.setQuantity(qtyOpt.getAsInt());
+				anyChanges = true;
+			}
+
+			if (!anyChanges) {
+				view.show("Вы не внесли никаких изменений.\n");
+				continue;
+			}
+
+			if (view.askYesNo("Сохранить указанные изменения (Д/н) (Y/n)? ", true)) {
+
+				var prizePoolRepository = data.prizePoolRepository();
+				view.show(ViewModelBase.emptySpace(1));
+
+				if (prizePoolRepository.updateToyItem(toyItem)) {
+
+					view.show("Позиция успешно изменена:\n");
+					view.show(ViewModelBase.emptySpace(1));
+					view.show(ViewModelBase.of(toyItem));
+
+				} else {
+					view.show("Что-то пошло не так. Не удалось сохранить изменения.");
+				}
+			} else {
+				view.show("Изменения отменены.\n");
+				continue;
+			}
+
+			view.show(SHORT_HR);
+
+		} while (view.askYesNo("Редактировать другую позицию (Д/н) (Y/n)? ", true));
+
+		view.waitToProceed();
+		return rs;
+	}
+
+	private ReturnStatus deleteToyItem(Object nothing) {
+		var rs = new ReturnStatus(false);
+
+		view.clear();
+		view.show("Призовой фонд \u2014 Удаление позиции\n");
+
+		do {
+			view.show(ViewModelBase.emptySpace(1));
+
+			ToyItem toyItem = askToyItemById(
+					"Введите ID позиции, которую необходимо удалить (или пустой Ввод чтобы отменить): ");
+			if (toyItem == null) {
+				view.show("Удаление отменено.\n");
+				break;
+			}
+
+			view.show("Найдена запись:\n");
+			view.show(ViewModelBase.of(toyItem));
+
+			if (view.askYesNo("Удалить (Д/н) (Y/n)? ", true)) {
+
+				var prizePoolRepository = data.prizePoolRepository();
+				view.show(ViewModelBase.emptySpace(1));
+
+				if (prizePoolRepository.deleteToyItem(toyItem.getToyItemId())) {
+
+					view.show("Позиция успешно удалена:\n");
+					view.show(ViewModelBase.emptySpace(1));
+
+				} else {
+					view.show("Что-то пошло не так. Не удалось произвести удаление.");
+				}
+			} else {
+				view.show("Удаление отменено.\n");
+				continue;
+			}
+
+			view.show(SHORT_HR);
+
+		} while (view.askYesNo("Удалить другую позицию (Д/н) (Y/n)? ", true));
+
+		view.waitToProceed();
+		return rs;
+	}
 }

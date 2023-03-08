@@ -32,7 +32,7 @@ public class CsvDbContext implements DbContext {
 	private static String toyItemToCsv(ToyItem toyItem) {
 		StringBuilder sb = new StringBuilder()
 				.append(toyItem.getToyItemId())
-				.append(CSV_SEP).append(toyItem.getName().replace(CSV_SEP, CSV_SEP_REPLACEMENT))
+				.append(CSV_SEP).append(toyItem.getName().replace(CSV_SEP_REPLACEMENT, "").replace(CSV_SEP, CSV_SEP_REPLACEMENT))
 				.append(CSV_SEP).append(toyItem.getWeight())
 				.append(CSV_SEP).append(toyItem.getQuantity());
 		return sb.toString();

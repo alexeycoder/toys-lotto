@@ -14,7 +14,7 @@ public interface PrizePoolRepository {
 
 	ToyItem getToyItemById(int toyItemId);
 
-	ToyItem getToyItemByName(String toyName);
+	List<ToyItem> getToyItemsByName(String toyName);
 
 	List<ToyItem> getAllToyItems();
 

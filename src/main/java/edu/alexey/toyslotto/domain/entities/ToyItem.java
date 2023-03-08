@@ -1,6 +1,9 @@
 package edu.alexey.toyslotto.domain.entities;
 
 public class ToyItem {
+	public static final int MAX_WEIGHT = 100;
+	public static final int MIN_WEIGHT = 0;
+
 	private Integer toyItemId;
 	private String name;
 	private int weight;
@@ -46,7 +49,7 @@ public class ToyItem {
 	 * @param weight Must be in range 0-100.
 	 */
 	public void setWeight(int weight) {
-		if (weight < 0 || weight > 100) {
+		if (weight < MIN_WEIGHT || weight > MAX_WEIGHT) {
 			throw new IllegalArgumentException();
 		}
 		this.weight = weight;

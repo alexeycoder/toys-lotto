@@ -1,5 +1,7 @@
 package edu.alexey.toyslotto.client.viewmodels;
 
+import java.util.List;
+
 import edu.alexey.toyslotto.client.uielements.Menu;
 import edu.alexey.toyslotto.domain.entities.ToyItem;
 
@@ -18,6 +20,10 @@ public abstract class ViewModelBase {
 
 	public static ViewModelBase of(ToyItem toyItem) {
 		return new ToyItemViewModel(toyItem);
+	}
+
+	public static ViewModelBase of(List<ToyItem> toyItems) {
+		return new ToyItemsListViewModel(toyItems);
 	}
 
 	public static ViewModelBase emptySpace(Integer nLines) {
