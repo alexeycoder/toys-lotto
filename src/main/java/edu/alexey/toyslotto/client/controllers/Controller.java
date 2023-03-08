@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Set;
 
+import edu.alexey.toyslotto.AppSettings;
 import edu.alexey.toyslotto.client.uielements.Menu;
 import edu.alexey.toyslotto.client.uielements.MenuItem;
 import edu.alexey.toyslotto.client.viewmodels.ViewModelBase;
@@ -29,12 +30,19 @@ public class Controller {
 	public static final String GOODBYE = "Вы завершили программу.\nСпасибо что пользуетесь Лотереей Игрушек!\n";
 	public static final String SHORT_HR = "\u2014\n";
 	public static final String LOGO = "\u2684 \u001b[1;3;97mЛотерея Игрушек\u001b[0m \u2684\n";
+	public static final String RULES = "Правила:"
+			+ "\nРозыгрыш игрушек проводится среди заданного количества участников,"
+			+ "\nпо одному призу на участника."
+			+ "\nВероятность выпадения той или иной игрушки определяется отношением"
+			+ "\nеё условного веса суммарному весу всех игрушек в наличии."
+			+ "\nВсякое наименование игрушек участвует в розыгрыше пока имеется"
+			+ "\nв наличии хотя бы один экземпляр данного наименования.\n";
 
 	public final Menu MAIN_MENU = new Menu(
 			"Главное меню",
 			Map.of(
 					Set.of("1"), new MenuItem(1, "Призовой фонд ...", this::prizePoolLifecycle),
-					Set.of("2"), new MenuItem(2, "Устроить розыгрыш", null),
+					Set.of("2"), new MenuItem(2, "Провести лотерею", this::conductLottery),
 					Set.of(" "), new MenuItem(90, null, null),
 					CMD_EXIT, new MenuItem(99, "Завершить работу", null)));
 
@@ -383,6 +391,53 @@ public class Controller {
 		} while (view.askYesNo("Удалить другую позицию (Д/н) (Y/n)? ", true));
 
 		view.waitToProceed();
+		return rs;
+	}
+
+	private ReturnStatus conductLottery(Object nothing) {
+		var rs = new ReturnStatus(false);
+
+		view.clear();
+		view.show(LOGO);
+		view.show(ViewModelBase.emptySpace(1));
+		view.show("Проведение Розыгрыша\n");
+		view.show(ViewModelBase.emptySpace(1));
+		view.show(RULES);
+		view.show(ViewModelBase.emptySpace(1));
+
+		var numOfParticipants = view.askInteger("Введите количество участников (пустой Ввод для отмены):\n",
+				1, AppSettings.MAX_PARTICIPANTS);
+		if (numOfParticipants.isEmpty()) {
+			view.show("Лотерея отменена.\n");
+			return rs;
+		}
+
+		view.show("Внимание! Результат розыгрыша:\n");
+		view.show(ViewModelBase.emptySpace(1));
+
+		var prizePoolRepository = data.prizePoolRepository();
+		var lottoResult = prizePoolRepository.conductLottery(numOfParticipants.getAsInt());
+		view.show(ViewModelBase.lotteryResultModelView(lottoResult));
+
+		view.show(SHORT_HR);
+
+		var answer = view.askYesNo("Выберите:\n"
+				+ "\tД (Y) \u2014 если желаете выдать призы (позиции будут изъяты из базы), либо\n"
+				+ "\tн (n) \u2014 если желаете отменить результаты лотереи:\n", true);
+
+		view.show(ViewModelBase.emptySpace(1));
+		if (answer) {
+			for (ToyItem toyItem : lottoResult) {
+				prizePoolRepository.updateToyItem(toyItem);
+			}
+			view.show("Спасибо за ваш выбор. Призы успешно выданы.");
+		} else {
+			view.show("Спасибо за ваш выбор. Результаты лотереи аннулированы.");
+		}
+
+		view.show(ViewModelBase.emptySpace(1));
+		view.waitToProceed();
+
 		return rs;
 	}
 }

@@ -26,6 +26,10 @@ public abstract class ViewModelBase {
 		return new ToyItemsListViewModel(toyItems);
 	}
 
+	public static ViewModelBase lotteryResultModelView(List<ToyItem> toyItems) {
+		return new LotteryResultViewModel(toyItems);
+	}
+
 	public static ViewModelBase emptySpace(Integer nLines) {
 		return new ViewModelBase() {
 			@Override
