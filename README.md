@@ -29,25 +29,32 @@
 
 ### Главное меню
 
+![Снимок экрана от 2023-03-08 11-37-14](https://user-images.githubusercontent.com/109767480/223666578-76adae9d-74f6-4aa4-bcd2-ab534f5b26fe.png)
 
 ### Меню работы с базой данных призового фонда
 
+![Снимок экрана от 2023-03-08 11-37-42](https://user-images.githubusercontent.com/109767480/223666611-146d8925-564e-4cf5-97cb-c0e805e87b9b.png)
 
 ### Вывод позиций
 
+![Снимок экрана от 2023-03-08 11-37-49](https://user-images.githubusercontent.com/109767480/223666631-7b89002c-e2fb-4e2d-83d9-896dc591f32b.png)
 
 ### Вариант поиска позиции
 
+![Снимок экрана от 2023-03-08 11-38-27](https://user-images.githubusercontent.com/109767480/223666654-e442118e-403d-41a6-9bb1-e918e15e1f74.png)
 
 ### Добавление позиции
 
+![Снимок экрана от 2023-03-08 11-39-34](https://user-images.githubusercontent.com/109767480/223666678-d2449eed-5245-42be-b1ad-3bcc618b90aa.png)
 
 ### Редактирование позиции
 
+![Снимок экрана от 2023-03-08 11-40-37](https://user-images.githubusercontent.com/109767480/223666696-5f0105a1-0f3a-4b29-a652-8480449dcb65.png)
 
 ### Проведение лотереи
 
+![Снимок экрана от 2023-03-08 11-41-19](https://user-images.githubusercontent.com/109767480/223666714-d5b8aa59-8868-4c6a-a450-e4818202c078.png)
 
 ## Структура проекта
 
-
+![Снимок экрана от 2023-03-08 11-44-30](https://user-images.githubusercontent.com/109767480/223666727-a3b228d3-918c-4d81-b973-6e3e70cfe7e8.png)
