@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.ObjIntConsumer;
@@ -91,16 +92,16 @@ public class CsvQueryableBase<T> implements Queryable<T> {
 	}
 
 	@Override
-	public Stream<T> queryAll() {
+	public List<T> queryAll() {
 		try (var linesStream = Files.lines(file.toPath(), CHARSET)) {
 
 			var items = getEntriesStream(linesStream).toList(); // accumulate to list due to short life of supplier
 																// lifeStream
-			return items.stream();
+			return items;
 
 		} catch (IOException e) {
 			// todo: log
-			return Stream.<T>empty();
+			return List.of();
 		}
 	}
 
