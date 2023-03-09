@@ -57,7 +57,7 @@
 
 *далее, разыгрываем всё что есть...*
 
-![Снимок экрана от 2023-03-09 15-31-47](https://user-images.githubusercontent.com/109767480/224024935-02185c4a-a5bb-463d-bd47-f6a1960c4ba7.png)
+![Снимок экрана от 2023-03-09 15-55-13](https://user-images.githubusercontent.com/109767480/224029449-4f892a9f-c31d-42ef-9036-5d9c1d5a17c6.png)
 
 ...
 
