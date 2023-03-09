@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Set;
 
-import edu.alexey.toyslotto.AppSettings;
 import edu.alexey.toyslotto.client.uielements.Menu;
 import edu.alexey.toyslotto.client.uielements.MenuItem;
 import edu.alexey.toyslotto.client.viewmodels.ViewModelBase;
@@ -125,10 +124,10 @@ public class Controller {
 	// handlers
 
 	// private ReturnStatus dummyHandler(Object nothing) {
-	// 	view.show("Скоро, но не сейчас...\n"
-	// 			+ "Данная функция будет доступна в следующей версии.");
-	// 	view.waitToProceed();
-	// 	return new ReturnStatus(false);
+	// view.show("Скоро, но не сейчас...\n"
+	// + "Данная функция будет доступна в следующей версии.");
+	// view.waitToProceed();
+	// return new ReturnStatus(false);
 	// }
 
 	private ReturnStatus showPrizePool(Object nothing) {
@@ -397,6 +396,8 @@ public class Controller {
 	private ReturnStatus conductLottery(Object nothing) {
 		var rs = new ReturnStatus(false);
 
+		var prizePoolRepository = data.prizePoolRepository();
+
 		view.clear();
 		view.show(LOGO);
 		view.show(ViewModelBase.emptySpace(1));
@@ -405,17 +406,30 @@ public class Controller {
 		view.show(RULES);
 		view.show(ViewModelBase.emptySpace(1));
 
-		var numOfParticipants = view.askInteger("Введите количество участников (пустой Ввод для отмены):\n",
-				1, AppSettings.MAX_PARTICIPANTS);
+		int nAvailableToys = prizePoolRepository.countToysAvailable();
+		if (nAvailableToys == 0) {
+			view.show("Нет ни одной игрушки в наличии. Проведение лотереи невозможно!\n");
+			view.show(ViewModelBase.emptySpace(1));
+			view.waitToProceed();
+			return rs;
+		}
+
+		view.show(String.format("Всего игрушек всех наименований в наличии: %d\n", nAvailableToys));
+		view.show(ViewModelBase.emptySpace(1));
+
+		var numOfParticipants = view.askInteger(
+				String.format("Введите количество участников, не более %d (пустой Ввод для отмены):\n", nAvailableToys),
+				1, nAvailableToys);
 		if (numOfParticipants.isEmpty()) {
 			view.show("Лотерея отменена.\n");
+			view.show(ViewModelBase.emptySpace(1));
+			view.waitToProceed();
 			return rs;
 		}
 
 		view.show("Внимание! Результат розыгрыша:\n");
 		view.show(ViewModelBase.emptySpace(1));
 
-		var prizePoolRepository = data.prizePoolRepository();
 		var lottoResult = prizePoolRepository.conductLottery(numOfParticipants.getAsInt());
 		view.show(ViewModelBase.lotteryResultModelView(lottoResult));
 

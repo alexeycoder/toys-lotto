@@ -1,11 +1,11 @@
 package edu.alexey.toyslotto.domain.db.interfaces;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 public interface Queryable<T> {
 	T add(T entry);
 
-	Stream<T> queryAll();
+	List<T> queryAll();
 
 	T get(int id);
 

@@ -53,8 +53,16 @@
 
 ### Проведение лотереи
 
-![Снимок экрана от 2023-03-08 11-41-19](https://user-images.githubusercontent.com/109767480/223666714-d5b8aa59-8868-4c6a-a450-e4818202c078.png)
+![Снимок экрана от 2023-03-09 15-30-33](https://user-images.githubusercontent.com/109767480/224024932-2a9b2128-3a4a-4943-848d-5bad3956b3fe.png)
+
+*далее, разыгрываем всё что есть...*
+
+![Снимок экрана от 2023-03-09 15-31-47](https://user-images.githubusercontent.com/109767480/224024935-02185c4a-a5bb-463d-bd47-f6a1960c4ba7.png)
+
+...
+
+![Снимок экрана от 2023-03-09 15-32-40](https://user-images.githubusercontent.com/109767480/224024940-496c9d73-989e-4bd1-a5e6-548d10936a8a.png)
 
 ## Структура проекта
 
-![Снимок экрана от 2023-03-08 11-44-30](https://user-images.githubusercontent.com/109767480/223666727-a3b228d3-918c-4d81-b973-6e3e70cfe7e8.png)
+![Снимок экрана от 2023-03-08 11-44-30_001](https://user-images.githubusercontent.com/109767480/224027163-7caef1cc-5252-40e9-ba61-8296fa30fa67.png)
