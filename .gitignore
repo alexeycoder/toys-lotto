@@ -1,6 +1,7 @@
 [Ii]mages/
 [Tt]est/
 .vscode/
+target/
 SCHEME.md
 SCHEME_v2.md
 
